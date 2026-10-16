@@ -1,0 +1,33 @@
+import { notFound } from "next/navigation";
+import { DesignApp } from "@/components/design/DesignApp";
+import { getProject } from "@/server/workspace-service";
+
+export const dynamic = "force-dynamic";
+
+export default async function ProjectDesignRoutePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ projectId: string }>;
+  searchParams: Promise<{ element?: string }>;
+}) {
+  const { projectId } = await params;
+  const { element } = await searchParams;
+  const project = await getProject(projectId);
+  if (!project) notFound();
+
+  return (
+    <DesignApp
+      project={{
+        id: project.id,
+        title: project.title,
+        theme: project.theme,
+        status: project.status,
+        folderPath: project.folderPath,
+      }}
+      blueprint={project.blueprint}
+      revision={project.revision}
+      initialElementId={typeof element === "string" && element ? element : null}
+    />
+  );
+}
