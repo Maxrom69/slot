@@ -1,0 +1,33 @@
+import { notFound } from "next/navigation";
+import { AssetLibraryApp } from "@/components/assets/AssetLibraryApp";
+import { getProjectAssets } from "@/server/asset-service";
+import { getProject } from "@/server/workspace-service";
+
+export const dynamic = "force-dynamic";
+
+export default async function ProjectAssetsRoutePage({
+  params,
+}: {
+  params: Promise<{ projectId: string }>;
+}) {
+  const { projectId } = await params;
+  const project = await getProject(projectId);
+  if (!project) notFound();
+
+  const assetsResponse = await getProjectAssets(projectId);
+
+  return (
+    <AssetLibraryApp
+      project={{
+        id: project.id,
+        title: project.title,
+        theme: project.theme,
+        status: project.status,
+        folderPath: project.folderPath,
+      }}
+      blueprint={project.blueprint}
+      initialAssets={assetsResponse.assets}
+      totalStorageBytes={assetsResponse.totalStorageBytes}
+    />
+  );
+}
