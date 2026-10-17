@@ -1,4 +1,4 @@
-<div align="center">
+<div align="left">
 
 <img width="512" height="512" alt="" src="https://github.com/Maxrom69/slot/blob/main/public/slot_512_no.png" />
 
