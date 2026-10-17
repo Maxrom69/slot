@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="512" height="512" alt="SSBanner" src="https://raw.githubusercontent.com/Maxrom69/slot/refs/heads/main/public/slot_512_no.png?token=GHSAT0AAAAAAEL3Q46MI76CTGXJIW3UTUEY2WSVIVQ" />
+<img width="512" height="512" alt="" src="https://github.com/Maxrom69/slot/blob/main/public/slot_512_no.png" />
 
 
 # Slot Studio
