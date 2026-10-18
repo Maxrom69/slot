@@ -126,14 +126,9 @@ let seedChecked = false;
 
 export async function ensureDemoWorkspace(): Promise<void> {
   if (seedChecked) return;
-  const existing = await db.select({ id: projects.id }).from(projects).limit(1);
-  if (existing.length > 0) {
-    // One-time, idempotent upgrade: refresh demo blueprints that predate symbol art.
-    await upgradeDemoBlueprints();
-    seedChecked = true;
-    return;
-  }
 
+  // Seed each missing demo independently so an existing production database
+  // cannot hide the built-in demos when it already contains user projects.
   const folderPaths = Array.from(
     new Set(
       DEMO_PROJECTS.map((p) => p.folderPath).filter((p): p is string => Boolean(p)),
@@ -204,6 +199,8 @@ export async function ensureDemoWorkspace(): Promise<void> {
       .onConflictDoNothing();
   }
 
+  // Upgrade older demo rows after inserting any that were missing.
+  await upgradeDemoBlueprints();
   seedChecked = true;
 }
 
