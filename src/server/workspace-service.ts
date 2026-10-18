@@ -245,6 +245,51 @@ async function upgradeDemoBlueprints(): Promise<void> {
 /* reads                                                               */
 /* ------------------------------------------------------------------ */
 
+function demoProjectRows(): ProjectRow[] {
+  const now = Date.now();
+  return DEMO_PROJECTS.map((demo) => {
+    const createdAt = new Date(now - demo.createdDaysAgo * 86_400_000);
+    const updatedAt = new Date(now - demo.updatedMinutesAgo * 60_000);
+    return {
+      id: demo.id,
+      title: demo.title,
+      theme: demo.theme,
+      styleGuide: demo.styleGuide,
+      description: demo.description,
+      status: demo.status,
+      folderPath: demo.folderPath ?? "",
+      thumbnailUri: demo.thumbnailUri,
+      columns: demo.columns,
+      rows: demo.rows,
+      paylineCount: demo.paylineCount,
+      rtpTarget: demo.rtpTarget,
+      volatility: demo.volatility,
+      isDemo: true,
+      deletedAt: null,
+      revision: 0,
+      blueprint: createBlueprint({
+        id: demo.id,
+        title: demo.title,
+        description: demo.description,
+        theme: demo.theme,
+        styleGuide: demo.styleGuide,
+        status: demo.status,
+        columns: demo.columns,
+        rows: demo.rows,
+        paylineCount: demo.paylineCount,
+        rtpTarget: demo.rtpTarget,
+        volatility: demo.volatility,
+        tags: demo.tags,
+        symbolArt: demo.symbolArt,
+        createdAt: createdAt.toISOString(),
+        updatedAt: updatedAt.toISOString(),
+      }),
+      createdAt,
+      updatedAt,
+    };
+  });
+}
+
 function safeRevalidatePath(routePath: string): void {
   try {
     revalidatePath(routePath);
@@ -260,16 +305,17 @@ export async function getWorkspace(): Promise<WorkspaceSnapshot> {
     db.select().from(folders).orderBy(asc(folders.path)),
   ]);
 
+  const visibleRows = projectRows.length > 0 ? projectRows : demoProjectRows();
   return {
-    projects: projectRows.map(toProjectSummary),
-    folders: folderRows.map((row) => toFolderSummary(row, projectRows, folderRows)),
+    projects: visibleRows.map(toProjectSummary),
+    folders: folderRows.map((row) => toFolderSummary(row, visibleRows, folderRows)),
   };
 }
 
 export async function getProject(id: string): Promise<ProjectDetail | null> {
   await ensureDemoWorkspace();
   const rows = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
-  const row = rows[0];
+  const row = rows[0] ?? demoProjectRows().find((project) => project.id === id);
   if (!row || row.deletedAt) return null;
   return toProjectDetail(row);
 }
